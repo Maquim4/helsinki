@@ -69,22 +69,20 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    if (
-      persons.every((person) => !areTheseObjectsEqual(person, personObject))
-    ) {
-      personService.create(personObject).then((returnObject) => {
-        setPersons(persons.concat(returnObject));
-      });
+    const samePerson = persons.find((p) => p.name === newName);
+
+    if (samePerson !== undefined && samePerson.number === newNumber) {
+      alert(`${newName} is already added to the phonebook`);
     } else if (
+      samePerson !== undefined &&
       window.confirm(
         `${newName} is already added to phonebook, replace the old number with a new one?`
       )
     ) {
-      const personId = persons.find((p) => p.name === newName).id;
-      personService.update(personId, personObject).then((returnObject) => {
+      personService.update(samePerson.id, personObject).then((returnObject) => {
         setPersons(
           persons.map((person) =>
-            person.id !== personId ? person : returnObject
+            person.id !== samePerson.id ? person : returnObject
           )
         );
       });
@@ -93,6 +91,7 @@ const App = () => {
         setPersons(persons.concat(returnObject));
       });
     }
+
     setNewName('');
     setNewNumber('');
   };
@@ -120,7 +119,7 @@ const App = () => {
     setSearch(event.target.value);
   };
 
-  function areTheseObjectsEqual(first, second) {
+  /* function areTheseObjectsEqual(first, second) {
     // If the value of either variable is empty
     // we can instantly compare them and check
     // for equality.
@@ -202,7 +201,7 @@ const App = () => {
     );
 
     return allKeysExist && allKeyValuesMatch;
-  }
+  } */
 
   const personsToShow = search
     ? persons.filter(
