@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import personService from './services/persons';
+import Notification from './components/Notification';
 
 const Filter = ({ search, handleSearchChange }) => {
   return (
@@ -56,6 +57,8 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [search, setSearch] = useState('');
+  const [message, setMessage] = useState(null);
+  const [messageState, setMessageState] = useState('');
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
@@ -72,25 +75,43 @@ const App = () => {
     const samePerson = persons.find((p) => p.name === newName);
 
     if (samePerson !== undefined && samePerson.number === newNumber) {
-      alert(`${newName} is already added to the phonebook`);
+      setMessage(`${newName} is already added to the phonebook`);
     } else if (
       samePerson !== undefined &&
       window.confirm(
         `${newName} is already added to phonebook, replace the old number with a new one?`
       )
     ) {
-      personService.update(samePerson.id, personObject).then((returnObject) => {
-        setPersons(
-          persons.map((person) =>
-            person.id !== samePerson.id ? person : returnObject
-          )
-        );
-      });
+      personService
+        .update(samePerson.id, personObject)
+        .then((returnObject) => {
+          setPersons(
+            persons.map((person) =>
+              person.id !== samePerson.id ? person : returnObject
+            )
+          );
+          setMessage(`${newName}'s number is changed`);
+        })
+        .catch((error) => {
+          setMessageState('error');
+          setMessage(
+            `Information of ${newName} has already been removed from server`
+          );
+          setPersons(persons.filter((p) => p.id !== samePerson.id));
+        });
+      setTimeout(() => {
+        setMessage(null);
+        setMessageState('');
+      }, 3000);
     } else {
       personService.create(personObject).then((returnObject) => {
         setPersons(persons.concat(returnObject));
       });
+      setMessage(`Added ${newName}`);
     }
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
 
     setNewName('');
     setNewNumber('');
@@ -212,6 +233,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} state={messageState} />
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <PersonForm
