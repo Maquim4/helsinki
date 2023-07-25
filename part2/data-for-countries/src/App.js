@@ -73,9 +73,8 @@ const App = () => {
       });
   }, []);
 
-  const countriesToShow = countries.filter(
-    (country) =>
-      !country.name.common.toLowerCase().indexOf(search.toLowerCase())
+  const countriesToShow = countries.filter((country) =>
+    country.name.common.toLowerCase().includes(search.toLocaleLowerCase())
   );
 
   return (
