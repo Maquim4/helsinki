@@ -104,10 +104,17 @@ const App = () => {
         setMessageState('');
       }, 3000);
     } else {
-      personService.create(personObject).then((returnObject) => {
-        setPersons(persons.concat(returnObject));
-      });
-      setMessage(`Added ${newName}`);
+      personService
+        .create(personObject)
+        .then((returnObject) => {
+          setPersons(persons.concat(returnObject));
+          setMessage(`Added ${newName}`);
+        })
+        .catch((error) => {
+          // this is the way to access the error message
+          console.log(error.response.data.error);
+          setMessage(error.response.data.error);
+        });
     }
     setTimeout(() => {
       setMessage(null);
