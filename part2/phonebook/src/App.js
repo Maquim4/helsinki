@@ -94,10 +94,8 @@ const App = () => {
         })
         .catch((error) => {
           setMessageState('error');
-          setMessage(
-            `Information of ${newName} has already been removed from server`
-          );
-          setPersons(persons.filter((p) => p.id !== samePerson.id));
+          console.log(error.response.data.error);
+          setMessage(error.response.data.error);
         });
       setTimeout(() => {
         setMessage(null);
@@ -111,13 +109,14 @@ const App = () => {
           setMessage(`Added ${newName}`);
         })
         .catch((error) => {
-          // this is the way to access the error message
+          setMessageState('error');
           console.log(error.response.data.error);
           setMessage(error.response.data.error);
         });
     }
     setTimeout(() => {
       setMessage(null);
+      setMessageState('');
     }, 3000);
 
     setNewName('');
@@ -133,17 +132,14 @@ const App = () => {
   };
 
   const handleNameChange = (event) => {
-    console.log(event.target.value);
     setNewName(event.target.value);
   };
 
   const handleNumberChange = (event) => {
-    console.log(event.target.value);
     setNewNumber(event.target.value);
   };
 
   const handleSearchChange = (event) => {
-    console.log(event.target.value);
     setSearch(event.target.value);
   };
 
