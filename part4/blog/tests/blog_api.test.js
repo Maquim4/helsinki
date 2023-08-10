@@ -4,13 +4,14 @@ const helper = require('./test_helper');
 const app = require('../app');
 const api = supertest(app);
 const Blog = require('../models/blog');
-
-beforeEach(async () => {
-  await Blog.deleteMany({});
-  await Blog.insertMany(helper.initialBlogs);
-});
+const User = require('../models/user');
+const bcrypt = require('bcrypt');
 
 describe('when there is initially some blogs saved', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({});
+    await Blog.insertMany(helper.initialBlogs);
+  });
   test('blog posts are returned with the correct amount as json', async () => {
     await api
       .get('/api/blogs')
@@ -53,7 +54,7 @@ describe('addition of a new blog', () => {
 
   test('default likes property equal zero', async () => {
     const newBlog = {
-      title: 'ysl',
+      title: 'yslLarl',
       author: 'Larl',
       url: 'https://ru.dotabuff.com/esports/players/106305042-larl',
     };
@@ -67,6 +68,8 @@ describe('addition of a new blog', () => {
   });
 
   test('blog without url or title is not added', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+
     const newBlog = {
       author: 'frfrfrfrfr',
     };
@@ -75,7 +78,7 @@ describe('addition of a new blog', () => {
 
     const blogsAtEnd = await helper.blogsInDb();
 
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length);
   });
 });
 
@@ -88,7 +91,7 @@ describe('deletion of a blog', () => {
 
     const blogsAtEnd = await helper.blogsInDb();
 
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1);
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1);
 
     const contents = blogsAtEnd.map((b) => b.title);
 
@@ -114,6 +117,60 @@ describe('updating the information of an individual blog post', () => {
     );
 
     expect(patchedBlog.likes).toBe(blogToUpd.likes);
+  });
+});
+
+describe('when there is initially one user in db', () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash('sekret', 10);
+    const user = new User({ username: 'root', passwordHash });
+
+    await user.save();
+  });
+
+  test('creation succeeds with a fresh username', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: 'mluukkai',
+      name: 'Matti Luukkainen',
+      password: 'salainen',
+    };
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map((u) => u.username);
+    expect(usernames).toContain(newUser.username);
+  });
+
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: 'root',
+      name: 'Superuser',
+      password: 'salainen',
+    };
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    expect(result.body.error).toContain('expected `username` to be unique');
+
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
 });
 
