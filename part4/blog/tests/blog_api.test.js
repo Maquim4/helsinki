@@ -38,9 +38,13 @@ describe('addition of a new blog', () => {
       likes: 999,
       url: 'https://ru.dotabuff.com/players/321580662',
     };
+    const lg = await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'sekret' });
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${lg.token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
