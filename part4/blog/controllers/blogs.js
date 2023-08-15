@@ -24,7 +24,8 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
   }
   blog.user = user._id;
 
-  const createdBlog = await blog.save();
+  let createdBlog = await blog.save();
+  createdBlog = await createdBlog.populate('user', { username: 1, name: 1 });
   user.blogs = user.blogs.concat(createdBlog._id);
   await user.save();
   response.status(201).json(createdBlog);
@@ -33,9 +34,7 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
 blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   const blog = await Blog.findById(request.params.id);
 
-  console.log(blog.toString());
   const user = request.user;
-  console.log(user);
 
   if (!user || blog.user.toString() !== user.id.toString()) {
     return response.status(401).json({ error: 'operation not permitted' });
@@ -50,13 +49,14 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
 });
 
 blogsRouter.put('/:id', async (request, response) => {
-  const { title, url, author, likes } = request.body;
+  const { title, url, author, likes, user } = request.body;
 
-  const updatedBlog = await Blog.findByIdAndUpdate(
+  let updatedBlog = await Blog.findByIdAndUpdate(
     request.params.id,
-    { title, url, author, likes },
+    { title, url, author, likes, user },
     { new: true }
   );
+  updatedBlog = await updatedBlog.populate('user', { username: 1, name: 1 });
 
   response.json(updatedBlog);
 });
