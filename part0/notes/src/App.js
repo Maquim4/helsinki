@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Note from './components/Note';
 import Notification from './components/Notification';
 import Footer from './components/Footer';
 import noteService from './services/notes';
 import loginService from './services/login';
+import LoginForm from './components/LoginForm';
+import Togglable from './components/Togglable';
+import NoteForm from './components/NoteForm';
 
 const App = () => {
   const [notes, setNotes] = useState([]);
-  const [newNote, setNewNote] = useState('');
   const [showAll, setShowAll] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
+  const noteFormRef = useRef();
 
   useEffect(() => {
     noteService.getAll().then((initialNotes) => {
@@ -29,24 +30,11 @@ const App = () => {
     }
   }, []);
 
-  console.log('render', notes.length, 'notes');
-  const addNote = (event) => {
-    event.preventDefault();
-
-    const noteObject = {
-      content: newNote,
-      important: Math.random() < 0.5,
-    };
-
+  const addNote = (noteObject) => {
+    noteFormRef.current.toggleVisibility();
     noteService.create(noteObject).then((returnedNote) => {
       setNotes(notes.concat(returnedNote));
-      setNewNote('');
     });
-  };
-
-  const handleNoteChange = (event) => {
-    console.log(event.target.value);
-    setNewNote(event.target.value);
   };
 
   const notesToShow = showAll
@@ -73,20 +61,13 @@ const App = () => {
       });
   };
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
-
+  const handleLogin = async (userObject) => {
     try {
-      const user = await loginService.login({
-        username,
-        password,
-      });
+      const user = await loginService.login(userObject);
 
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user));
       noteService.setToken(user.token);
       setUser(user);
-      setUsername('');
-      setPassword('');
     } catch (exception) {
       setErrorMessage('Wrong credentials');
       setTimeout(() => {
@@ -95,48 +76,22 @@ const App = () => {
     }
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
-
-  const noteForm = () => (
-    <form onSubmit={addNote}>
-      <input value={newNote} onChange={handleNoteChange} />
-      <button type="submit">save</button>
-    </form>
-  );
-
   return (
     <div>
-      <h1>Notes</h1>
-
+      <h1>Notes app</h1>
       <Notification message={errorMessage} />
 
-      {!user && loginForm()}
+      {!user && (
+        <Togglable buttonLabel="log in">
+          <LoginForm handleSubmit={handleLogin} />
+        </Togglable>
+      )}
       {user && (
         <div>
           <p>{user.name} logged in</p>
-          {noteForm()}
+          <Togglable buttonLabel="new note" ref={noteFormRef}>
+            <NoteForm createNote={addNote} />
+          </Togglable>
         </div>
       )}
 
@@ -146,13 +101,15 @@ const App = () => {
         </button>
       </div>
       <ul>
-        {notesToShow.map((note, i) => (
-          <Note
-            key={i}
-            note={note}
-            toggleImportance={() => toggleImportanceOf(note.id)}
-          />
-        ))}
+        <ul>
+          {notesToShow.map((note) => (
+            <Note
+              key={note.id}
+              note={note}
+              toggleImportance={() => toggleImportanceOf(note.id)}
+            />
+          ))}
+        </ul>
       </ul>
 
       <Footer />
