@@ -1,38 +1,22 @@
 import { useState } from 'react';
-import blogService from '../services/blogs';
 
-const BlogForm = ({ updateBlogs, blogs, notifyWith }) => {
+const BlogForm = ({ handleSubmit }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
 
-  const handleTitleChange = (event) => setTitle(event.target.value);
-  const handleAuthorChange = (event) => setAuthor(event.target.value);
-  const handleUrlChange = (event) => setUrl(event.target.value);
-
   const addBlog = (event) => {
     event.preventDefault();
 
-    const blogObject = {
+    handleSubmit({
       title: title,
       author: author,
       url: url,
-    };
+    });
 
-    blogService
-      .create(blogObject)
-      .then((returnedBlog) => {
-        updateBlogs(blogs.concat(returnedBlog));
-        notifyWith(
-          `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`
-        );
-        setTitle('');
-        setAuthor('');
-        setUrl('');
-      })
-      .catch((error) => {
-        notifyWith(error.response.data.error, 'error');
-      });
+    setTitle('');
+    setAuthor('');
+    setUrl('');
   };
 
   return (
@@ -40,15 +24,21 @@ const BlogForm = ({ updateBlogs, blogs, notifyWith }) => {
       <h2>create new</h2>
       <div>
         title:
-        <input value={title} onChange={handleTitleChange} />
+        <input
+          value={title}
+          onChange={({ target }) => setTitle(target.value)}
+        />
       </div>
       <div>
         author:
-        <input value={author} onChange={handleAuthorChange} />
+        <input
+          value={author}
+          onChange={({ target }) => setAuthor(target.value)}
+        />
       </div>
       <div>
         url:
-        <input value={url} onChange={handleUrlChange} />
+        <input value={url} onChange={({ target }) => setUrl(target.value)} />
       </div>
       <button type="submit">create</button>
     </form>
