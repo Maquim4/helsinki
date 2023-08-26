@@ -15,7 +15,9 @@ const Blog = ({ blog, like, user, deleteBlog }) => {
     <div style={blogStyle}>
       {!visible && (
         <div>
-          {blog.title} {blog.author}
+          <div className="title">{blog.title}</div>
+          <div className="author">{blog.author}</div>
+
           <button onClick={() => setVisible(!visible)}>view</button>
         </div>
       )}
@@ -23,7 +25,7 @@ const Blog = ({ blog, like, user, deleteBlog }) => {
         <div>
           {blog.title} {blog.author}
           <button onClick={() => setVisible(!visible)}>hide</button>
-          <div>
+          <div className="url">
             <a href={blog.url}>{blog.url}</a>
           </div>
           <div>
