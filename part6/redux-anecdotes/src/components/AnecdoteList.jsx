@@ -16,7 +16,6 @@ const Anecdote = ({ anecdote, handleVote }) => {
 const AnecdoteList = () => {
   const dispatch = useDispatch();
   const anecdotes = useSelector(({ anecdotes, filter }) => {
-    anecdotes.sort((a, b) => b.votes - a.votes);
     if (!filter) {
       return anecdotes;
     }
@@ -28,6 +27,7 @@ const AnecdoteList = () => {
   return (
     <div>
       <h2>Anecdotes</h2>
+
       <ul>
         {anecdotes.map((anecdote) => (
           <Anecdote
