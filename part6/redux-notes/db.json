@@ -2,7 +2,7 @@
   "notes": [
     {
       "content": "the app state is in redux store",
-      "important": true,
+      "important": false,
       "id": 1
     },
     {
@@ -12,8 +12,68 @@
     },
     {
       "content": "toma toma toma saka saka saks",
-      "important": false,
+      "important": true,
       "id": 3
+    },
+    {
+      "content": "another one",
+      "important": false,
+      "id": 4
+    },
+    {
+      "content": "e3",
+      "important": false,
+      "id": 5
+    },
+    {
+      "content": "d",
+      "important": false,
+      "id": 6
+    },
+    {
+      "content": "ww",
+      "important": true,
+      "id": 7
+    },
+    {
+      "content": "d",
+      "important": false,
+      "id": 8
+    },
+    {
+      "content": "54е45",
+      "important": true,
+      "id": 9
+    },
+    {
+      "content": "s",
+      "important": false,
+      "id": 10
+    },
+    {
+      "content": "w",
+      "important": false,
+      "id": 11
+    },
+    {
+      "content": "d",
+      "important": false,
+      "id": 12
+    },
+    {
+      "content": "ze",
+      "important": false,
+      "id": 13
+    },
+    {
+      "content": "zad",
+      "important": false,
+      "id": 14
+    },
+    {
+      "content": "zg",
+      "important": false,
+      "id": 15
     }
   ]
 }
