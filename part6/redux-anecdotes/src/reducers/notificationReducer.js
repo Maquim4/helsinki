@@ -6,14 +6,22 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     addNotification(state, action) {
-      // eslint-disable-next-line
-      return 'you voted' + ' "' + action.payload + '" ';
+      return action.payload;
     },
     removeNotification() {
       return '';
     },
   },
 });
+
+export const setNotification = (message, time) => {
+  return async (dispatch) => {
+    dispatch(addNotification(message));
+    setTimeout(() => {
+      dispatch(removeNotification());
+    }, time * 1000);
+  };
+};
 
 export const { addNotification, removeNotification } =
   notificationSlice.actions;
