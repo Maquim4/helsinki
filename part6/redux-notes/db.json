@@ -74,6 +74,10 @@
       "content": "zg",
       "important": false,
       "id": 15
+    },
+    {
+      "content": "redux 3",
+      "id": 16
     }
   ]
 }
